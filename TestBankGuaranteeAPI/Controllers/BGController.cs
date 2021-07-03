@@ -204,5 +204,39 @@ namespace TestBankGuaranteeAPI.Controllers
                 return Problem(detail: ex.Message);
             }
         }
+
+        [Route("api/[controller]/saveguaranteetype")]
+        [HttpPost]
+        public async Task<IActionResult> SaveNotificationNumber(
+            [FromBody] GuaranteeTypeModel guaranteeModel)
+        {
+            try
+            {
+                var userData = await context.TelegramUserData.FirstAsync(tgData =>
+                tgData.TelegramId == guaranteeModel.TelegramId);
+
+                if (userData == null)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                }
+
+                userData.GuaranteeType = guaranteeModel.GuaranteeType;
+                userData.Stage = Enum.GetName(UserStage.DefineBeginDate);
+
+                await context.SaveChangesAsync();
+
+                return Ok(JsonConvert.SerializeObject(new
+                {
+                    Result = "Success"
+                }));
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message);
+            }
+        }
     }
 }
