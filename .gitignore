@@ -332,3 +332,6 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+# ASP.Net Core Config Files
+appsettings*.json
