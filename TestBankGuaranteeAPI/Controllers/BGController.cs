@@ -281,5 +281,48 @@ namespace TestBankGuaranteeAPI.Controllers
                 return Problem(detail: ex.Message);
             }
         }
+
+        [Route("api/[controller]/saveenddate")]
+        [HttpPost]
+        public async Task<IActionResult> SaveEndDate([FromBody] DateModel dateModel)
+        {
+            try
+            {
+                var userData = await context.TelegramUserData.FirstAsync(tgData =>
+                tgData.TelegramId == dateModel.TelegramId);
+
+                if (userData == null)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                }
+
+                UserStage userStage = (UserStage)Enum.Parse(typeof(UserStage), userData.Stage);
+
+                if (userStage != UserStage.DefineEndDate)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                } 
+
+                userData.EndDate = dateModel.Date;
+                userData.Stage = Enum.GetName(UserStage.DefineSum);
+
+                await context.SaveChangesAsync();
+
+                return Ok(JsonConvert.SerializeObject(new
+                {
+                    Result = "Success"
+                }));
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message);
+            }
+        }
     }
 }
