@@ -324,5 +324,56 @@ namespace TestBankGuaranteeAPI.Controllers
                 return Problem(detail: ex.Message);
             }
         }
+
+        [Route("api/[controller]/savesumgetbg")]
+        [HttpPost]
+        public async Task<IActionResult> SaveSumGetBG([FromBody] SumModel sumModel)
+        {
+            try
+            {
+                var userData = await context.TelegramUserData.FirstAsync(tgData =>
+                tgData.TelegramId == sumModel.TelegramId);
+
+                if (userData == null)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                }
+
+                UserStage userStage = (UserStage)Enum.Parse(typeof(UserStage), userData.Stage);
+
+                if (userStage != UserStage.DefineSum)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                } 
+
+                userData.Sum = sumModel.Sum;
+                userData.Stage = Enum.GetName(UserStage.GetGuarantee);
+
+                await context.SaveChangesAsync();
+
+                decimal fee = userData.Sum.Value * 0.02m;
+                int docNumber = (new Random()).Next(2000000, 3000000);
+
+                return Ok(JsonConvert.SerializeObject(new GetGuaranteeModel
+                {
+                    GuaranteeType = userData.GuaranteeType,
+                    BeginDate = userData.BeginDate.Value.ToShortDateString(),
+                    EndDate = userData.EndDate.Value.ToShortDateString(),
+                    Sum = userData.Sum.Value.ToString(),
+                    Fee = fee.ToString(),
+                    DocNumber = docNumber.ToString()
+                }));
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message);
+            }
+        }
     }
 }
