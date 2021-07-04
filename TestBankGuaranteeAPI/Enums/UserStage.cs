@@ -10,6 +10,6 @@
         DefineBeginDate,
         DefineEndDate,
         DefineSum,
-        GetGuarantee
+        CheckSign
     }
 }

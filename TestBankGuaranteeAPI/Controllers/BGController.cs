@@ -411,7 +411,7 @@ namespace TestBankGuaranteeAPI.Controllers
                 } 
 
                 userData.Sum = sumModel.Sum;
-                userData.Stage = Enum.GetName(UserStage.GetGuarantee);
+                userData.Stage = Enum.GetName(UserStage.CheckSign);
                 int docNumber = (new Random()).Next(2000000, 3000000);
                 userData.Link = docNumber.ToString();
 
