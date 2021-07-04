@@ -417,7 +417,7 @@ namespace TestBankGuaranteeAPI.Controllers
 
                 await context.SaveChangesAsync();
 
-                decimal fee = userData.Sum.Value * 0.02m;
+                decimal fee = Math.Round(userData.Sum.Value * 0.02m, 2);
 
                 return Ok(JsonConvert.SerializeObject(new GetGuaranteeModel
                 {
