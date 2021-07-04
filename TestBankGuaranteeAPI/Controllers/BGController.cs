@@ -140,7 +140,7 @@ namespace TestBankGuaranteeAPI.Controllers
         public async Task<IActionResult> GetUserStage(long telegramId)
         {
             TelegramUserData userData = await context.TelegramUserData
-                .FirstAsync(user => user.TelegramId == telegramId);
+                .FirstOrDefaultAsync(user => user.TelegramId == telegramId);
 
             if (userData != null)
             {
@@ -163,7 +163,7 @@ namespace TestBankGuaranteeAPI.Controllers
         public async Task<IActionResult> SignDocument(string docId)
         {
             TelegramUserData userData = await context.TelegramUserData
-                .FirstAsync(user => user.Link == docId);
+                .FirstOrDefaultAsync(user => user.Link == docId);
 
             if (userData != null)
             {
@@ -184,7 +184,7 @@ namespace TestBankGuaranteeAPI.Controllers
         public async Task<IActionResult> CheckSign(long telegramId)
         {
             TelegramUserData userData = await context.TelegramUserData
-                .FirstAsync(user => user.TelegramId == telegramId);
+                .FirstOrDefaultAsync(user => user.TelegramId == telegramId);
 
             if (userData != null)
             {
