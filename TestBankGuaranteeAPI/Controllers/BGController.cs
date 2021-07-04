@@ -158,7 +158,7 @@ namespace TestBankGuaranteeAPI.Controllers
             }
         }        
         
-        [Route("api/[controller]/signdoc")]
+        [Route("tradezone/Supplier/bgV2/bgV2Step3")]
         [HttpGet]
         public async Task<IActionResult> SignDocument(string docId)
         {
