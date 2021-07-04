@@ -139,14 +139,14 @@ namespace TestBankGuaranteeAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserStage(long telegramId)
         {
-            TelegramUserData user = await context.TelegramUserData
+            TelegramUserData userData = await context.TelegramUserData
                 .FirstAsync(user => user.TelegramId == telegramId);
 
-            if (user != null)
+            if (userData != null)
             {
                 return Ok(JsonConvert.SerializeObject(new
                 {
-                    user.Stage
+                    userData.Stage
                 }));
             }
             else
@@ -154,6 +154,64 @@ namespace TestBankGuaranteeAPI.Controllers
                 return Ok(JsonConvert.SerializeObject(new
                 {
                     Stage = Enum.GetName(UserStage.NotDefined)
+                }));
+            }
+        }        
+        
+        [Route("api/[controller]/signdoc")]
+        [HttpGet]
+        public async Task<IActionResult> SignDocument(string docId)
+        {
+            TelegramUserData userData = await context.TelegramUserData
+                .FirstAsync(user => user.Link == docId);
+
+            if (userData != null)
+            {
+                userData.Link += "(SIGNED)";
+
+                await context.SaveChangesAsync();
+
+                return new JsonResult("Документ успешно подписан!");
+            }
+            else
+            {
+                return new JsonResult("Ошибка! Документ не найден");
+            }
+        }
+
+        [Route("api/[controller]/checkdocsign")]
+        [HttpGet]
+        public async Task<IActionResult> CheckSign(long telegramId)
+        {
+            TelegramUserData userData = await context.TelegramUserData
+                .FirstAsync(user => user.TelegramId == telegramId);
+
+            if (userData != null)
+            {
+                if (userData.Link.Contains("(SIGNED)"))
+                {
+                    userData.Stage = Enum.GetName(UserStage.Registered);
+
+                    await context.SaveChangesAsync();
+
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Success"
+                    }));
+                }
+                else
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                }
+            }
+            else
+            {
+                return Ok(JsonConvert.SerializeObject(new
+                {
+                    Result = "Error"
                 }));
             }
         }
@@ -354,11 +412,12 @@ namespace TestBankGuaranteeAPI.Controllers
 
                 userData.Sum = sumModel.Sum;
                 userData.Stage = Enum.GetName(UserStage.GetGuarantee);
+                int docNumber = (new Random()).Next(2000000, 3000000);
+                userData.Link = docNumber.ToString();
 
                 await context.SaveChangesAsync();
 
                 decimal fee = userData.Sum.Value * 0.02m;
-                int docNumber = (new Random()).Next(2000000, 3000000);
 
                 return Ok(JsonConvert.SerializeObject(new GetGuaranteeModel
                 {
