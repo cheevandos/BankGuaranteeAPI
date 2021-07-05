@@ -340,6 +340,54 @@ namespace TestBankGuaranteeAPI.Controllers
             }
         }
 
+        [Route("api/[controller]/resetallsteps")]
+        [HttpPost]
+        public async Task<IActionResult> ResetAllSteps([FromBody] ResetModel resetModel)
+        {
+            try
+            {
+                var userData = await context.TelegramUserData.FirstAsync(tgData =>
+                tgData.TelegramId == resetModel.TelegramId);
+
+                if (userData == null)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                }
+
+                UserStage userStage = (UserStage)Enum.Parse(typeof(UserStage), userData.Stage);
+
+                if (userStage != UserStage.ChooseGuarantee &&
+                    userStage != UserStage.DefineBeginDate &&
+                    userStage != UserStage.DefineEndDate &&
+                    userStage != UserStage.DefineSum)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "Error"
+                    }));
+                }
+
+                UserStage[] enumValues = Enum.GetValues<UserStage>();
+                int prevStageNum = Array.IndexOf(enumValues, userStage) - 1;
+                UserStage prevStage = enumValues[prevStageNum];
+                userData.Stage = Enum.GetName(prevStage);
+
+                await context.SaveChangesAsync();
+
+                return Ok(JsonConvert.SerializeObject(new
+                {
+                    Result = "Success"
+                }));
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message);
+            }
+        }
+
         [Route("api/[controller]/saveenddate")]
         [HttpPost]
         public async Task<IActionResult> SaveEndDate([FromBody] DateModel dateModel)
@@ -366,6 +414,14 @@ namespace TestBankGuaranteeAPI.Controllers
                         Result = "Error"
                     }));
                 } 
+
+                if (dateModel.Date <= userData.BeginDate)
+                {
+                    return Ok(JsonConvert.SerializeObject(new
+                    {
+                        Result = "CompareError"
+                    }));
+                }
 
                 userData.EndDate = dateModel.Date;
                 userData.Stage = Enum.GetName(UserStage.DefineSum);
