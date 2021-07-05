@@ -370,10 +370,12 @@ namespace TestBankGuaranteeAPI.Controllers
                     }));
                 }
 
-                UserStage[] enumValues = Enum.GetValues<UserStage>();
-                int prevStageNum = Array.IndexOf(enumValues, userStage) - 1;
-                UserStage prevStage = enumValues[prevStageNum];
-                userData.Stage = Enum.GetName(prevStage);
+                userData.Stage = Enum.GetName(UserStage.Registered);
+
+                //UserStage[] enumValues = Enum.GetValues<UserStage>();
+                //int prevStageNum = Array.IndexOf(enumValues, userStage) - 1;
+                //UserStage prevStage = enumValues[prevStageNum];
+                //userData.Stage = Enum.GetName(prevStage);
 
                 await context.SaveChangesAsync();
 
